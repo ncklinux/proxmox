@@ -23,7 +23,7 @@ For this guide, I will be using VirtualBox. Please use the following minimum VM 
 
 ## Network Settings
 
-This is the [VirtualBox manual](https://www.virtualbox.org/manual/), which contains all the details you need about VirtualBox. Now, please click on Tools (on VirtualBox) and then select Network.
+This [manual](https://www.virtualbox.org/manual/) contains all the essential details you need about VirtualBox. Now, navigate to **Tools** in VirtualBox and choose **Network**.
 
 #### Adapter
 
@@ -80,7 +80,8 @@ exit
 $ ssh your_username@192.168.56.10
 $ sudo su -
 
-# Edit hosts, if your IP address is 192.168.56.10 and your hostname is proxmox, your /etc/hosts file might look like this:
+# Edit hosts, if your IP address is 192.168.56.10 and your hostname is proxmox, your
+# /etc/hosts file might look like this:
 $ vim /etc/hosts
 # IPv4
 127.0.0.1       localhost
@@ -105,8 +106,12 @@ iface enp0s8 inet6 static
     address fd00::10/64
     gateway fd00::1
 
-$ hostnamectl set-hostname proxmox.local # You will need to customize it to match your own hostname (in this example, it is set to proxmox.local, as specified in the /etc/hosts file)
-$ hostname --ip-address # Ensure that at least one non-loopback IP address is returned
+# You will need to customize hostnamectl in order to match your own hostname (in this example,
+# it is set to proxmox.local, as specified in the /etc/hosts file)
+$ hostnamectl set-hostname proxmox.local
+
+# Ensure that at least one non-loopback IP address is returned
+$ hostname --ip-address
 # fd00::10 192.168.56.10
 
 # Restart the networking unit
@@ -137,9 +142,12 @@ $ ip route
 # 10.0.2.0/24 dev enp0s3 proto kernel scope link src 10.0.2.15
 # 192.168.56.0/24 dev enp0s8 proto kernel scope link src 192.168.56.10
 
-# It appears that the default route is incorrectly set to 192.168.56.254 via enp0s8, that's the problem, because enp0s8 is part of the host-only network, does not provide internet access. The default route should instead point to 10.0.2.2, which is the VirtualBox NAT gateway for enp0s3.
+# It appears that the default route is incorrectly set to 192.168.56.254 via enp0s8,
+# that's the problem, because enp0s8 is part of the host-only network, does not provide
+# internet access. The default route should instead point to 10.0.2.2, which is the
+# VirtualBox NAT gateway for enp0s3.
 
-# Test fix
+# Let's test it first
 $ ip route del default via 192.168.56.254 dev enp0s8
 $ ip route add default via 10.0.2.2 dev enp0s3
 $ ping -c2 8.8.8.8
@@ -147,7 +155,8 @@ $ ping -c2 8.8.8.8
 # 64 bytes from 8.8.8.8: icmp_seq=1 ttl=255 time=16.7 ms
 # 64 bytes from 8.8.8.8: icmp_seq=2 ttl=255 time=14.8 ms
 
-# Problem solved! To ensure that the changes are persistent, please comment out the gateway from the enp0s8 configuration
+# Issue resolved, to ensure that the changes are persistent, comment out the gateway
+# from the enp0s8 configuration
 $ vim /etc/network/interfaces
 auto enp0s8
 iface enp0s8 inet static
@@ -192,7 +201,7 @@ Regarding the Postfix configuration, note that chrony can be replaced with any o
 
 For networks with a mail server, configuring Postfix as a **satellite system** is advisable. In such setup, the existing mail server acts as the relay host, routing emails sent by Proxmox VE to their final recipients.
 
-If there is uncertainty about what to enter, selecting **local only** and keeping the system name as is is a suitable choice. In this instance, I will proceed with a **local only** setup since this is a test environment and there is no need to configure it on this VM at this time. If you need to modify the configuration in the future, you can do so using the command `dpkg-reconfigure postfix`.
+If there is uncertainty about what to enter, selecting **local only** and keeping the system name unchanged is a suitable choice. In this instance, I will proceed with a **local only** setup, since this is a test environment and there is no need to configure it on this VM at this time. If you need to modify the configuration in the future, you can do so using the command `dpkg-reconfigure postfix`.
 
 ```bash
 # Look for the Proxmox port
@@ -208,27 +217,27 @@ $ reboot
 
 ```
 
-That's it! Access the admin web interface at [https://192.168.56.10:8006](https://192.168.56.10:8006) or [https://[fd00::10]:8006](https://[fd00::10]:8006). If this is a fresh installation without users, select the PAM authentication realm and login using the root user account.
+That's it :smile: Access the UI at [https://192.168.56.10:8006](https://192.168.56.10:8006) or [https://[fd00::10]:8006](https://[fd00::10]:8006). If this is a fresh installation without users, select the PAM authentication realm and login using the root user account.
 
 ## ISO installation
 
 The graphical installation of Proxmox VE using the ISO is a straightforward process. After booting from the installation media, select "Install Proxmox VE (Graphical)" from the boot menu. The installer will guide you through essential steps, including disk partitioning, basic system configurations (e.g., timezone, language, network settings), and package installation. This user-friendly method is recommended for both new and experienced users, typically taking just a few minutes to complete.
 
-| Step 01                                      | Step 02                                      | Step 03                                      | Step 04                                      | Step 05                                      |
+| Graphical UI 01                              | Graphical UI 02                              | Graphical UI 03                              | Graphical UI 04                              | Graphical UI 05                              |
 | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
 | ![Screenshot](./misc/screenshots/GUI_01.png) | ![Screenshot](./misc/screenshots/GUI_02.png) | ![Screenshot](./misc/screenshots/GUI_03.png) | ![Screenshot](./misc/screenshots/GUI_04.png) | ![Screenshot](./misc/screenshots/GUI_05.png) |
 
-| Step 06                                      | Step 07                                      | Step 08                                      | Step 09                                      | Step 10                                      |
+| Graphical UI 06                              | Graphical UI 07                              | Graphical UI 08                              | Graphical UI 09                              | Graphical UI 10                              |
 | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
 | ![Screenshot](./misc/screenshots/GUI_06.png) | ![Screenshot](./misc/screenshots/GUI_07.png) | ![Screenshot](./misc/screenshots/GUI_08.png) | ![Screenshot](./misc/screenshots/GUI_09.png) | ![Screenshot](./misc/screenshots/GUI_10.png) |
 
-Alternatively, as demonstrated in the following example, I utilize the "Terminal UI," which functions in the same manner as the graphical interface.
+Alternatively, as illustrated in the example that follows, I make use of the **Terminal UI**, which functions in the same way as the **Graphical**.
 
-| Step 01                                      | Step 02                                      | Step 03                                      | Step 04                                      | Step 05                                      |
+| Terminal UI 01                               | Terminal UI 02                               | Terminal UI 03                               | Terminal UI 04                               | Terminal UI 05                               |
 | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
 | ![Screenshot](./misc/screenshots/TUI_01.png) | ![Screenshot](./misc/screenshots/TUI_02.png) | ![Screenshot](./misc/screenshots/TUI_03.png) | ![Screenshot](./misc/screenshots/TUI_04.png) | ![Screenshot](./misc/screenshots/TUI_05.png) |
 
-| Step 06                                      | Step 07                                      | Step 08                                      | Step 09                                      | Step 10                                      |
+| Terminal UI 06                               | Terminal UI 07                               | Terminal UI 08                               | Terminal UI 09                               | Terminal UI 10                               |
 | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
 | ![Screenshot](./misc/screenshots/TUI_06.png) | ![Screenshot](./misc/screenshots/TUI_07.png) | ![Screenshot](./misc/screenshots/TUI_08.png) | ![Screenshot](./misc/screenshots/TUI_09.png) | ![Screenshot](./misc/screenshots/TUI_10.png) |
 

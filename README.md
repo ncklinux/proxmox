@@ -1,4 +1,5 @@
-![Screenshot](./misc/screenshots/proxmox_logo.png)
+![Proxmox logo dark](./misc/screenshots/proxmox_logo_black.png#gh-dark-mode-only)
+![Proxmox logo light](./misc/screenshots/proxmox_logo_white.png#gh-light-mode-only)
 
 # Simplify your infrastructure operations!
 
@@ -65,18 +66,18 @@ $ ssh root@192.168.56.10
 $ apt update
 $ apt install -y vim sudo ifupdown2
 
-# Let's change some Vim settings
+# Let's add some Vim configuration
 $ vim /root/.vimrc
 syntax on
 set mouse=r
 colorscheme murphy
 
-# Add after root
+# Add the new entry immediately after the existing root superuser entry
 $ vim /etc/sudoers
 your_username ALL=(ALL:ALL) ALL # Save and quit :wq!
-exit
+exit # Or press Ctrl+D
 
-# From now on, use SSH with your user
+# From now on, use SSH to connect with your own username, rather than relying on root
 $ ssh your_username@192.168.56.10
 $ sudo su -
 

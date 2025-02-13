@@ -12,3 +12,6 @@
 
 # Vagrant
 .vagrant
+
+# Gimp files
+*.xcf

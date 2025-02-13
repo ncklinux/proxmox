@@ -1,5 +1,5 @@
-![Proxmox logo dark](./misc/screenshots/proxmox_logo_black.png#gh-dark-mode-only)
-![Proxmox logo light](./misc/screenshots/proxmox_logo_white.png#gh-light-mode-only)
+![Proxmox logo dark](./misc/screenshots/proxmox_logo_white.png#gh-dark-mode-only)
+![Proxmox logo light](./misc/screenshots/proxmox_logo_black.png#gh-light-mode-only)
 
 # Simplify your infrastructure operations!
 

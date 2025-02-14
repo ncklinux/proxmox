@@ -7,10 +7,11 @@ Proxmox is an open-source virtualization platform that offers a user-friendly we
 
 ![Screenshot](./misc/screenshots/proxmox_06.png)
 
-When installing Proxmox VE, there are two main methods to consider:
+When installing Proxmox VE, there are three main methods to consider:
 
-- Manual Installation via Terminal (CLI) or Ansible (and Puppet) if you prefer, this method involves installing Proxmox VE on a base operating system using [command-line](https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_12_Bookworm) ([Debian](https://www.debian.org/distrib/) is the optimal choice). While this is less common for most users, it can be very useful in certain situations where more control over the installation environment is needed.
+- Manual Installation via Terminal (CLI if you prefer), this method involves installing Proxmox VE on a base operating system using [command-line](https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_12_Bookworm) ([Debian](https://www.debian.org/distrib/) is the optimal choice). While this is less common for most users, it can be very useful in certain situations where more control over the installation environment is needed.
 - Installation via ISO, this is the most straightforward and common way to install Proxmox VE. You [download](https://www.proxmox.com/en/downloads) the Proxmox VE ISO image and boot from it, in order to initiate the installation process. This method provides a graphical installer that guides you through the setup steps.
+- Through deployment with Ansible or Puppet, I will provide an Ansible playbook to illustrate a complete example.
 
 ## Motivation
 
@@ -309,6 +310,29 @@ Next, test the connection by running the command `ping -6 fd00::10 -c2`. Additio
 | Dual-stack 01                                       | Dual-stack 02                                       | Dual-stack 03                                       | Dual-stack 04                                       |
 | --------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- |
 | ![Screenshot](./misc/screenshots/dual_stack_01.png) | ![Screenshot](./misc/screenshots/dual_stack_02.png) | ![Screenshot](./misc/screenshots/dual_stack_03.png) | ![Screenshot](./misc/screenshots/dual_stack_04.png) |
+
+## Ansible
+
+This playbook automates the deployment of Proxmox on a Debian 12, simplifying the installation process and ensuring consistent configurations. With user-friendly tasks and streamlined execution, it enables a quick and efficient setup for your virtualization needs. In order to deploy Proxmox, we need two servers, an Ansible controller (for example an Ubuntu server where the playbook resides) and a target server (the Debian 12 box to be provisioned). Ensure that the necessary packages are installed on controller and clone the playbook.
+
+```bash
+# Install Ansible, Ansible Lint, and Pip
+$ sudo apt install -y ansible ansible-lint python3-pip
+$ python3 -V && pip3 -V && ansible --version
+# Python 3.12.3
+# pip 24.0 from /usr/lib/python3/dist-packages/pip (python 3.12)
+# ansible [core 2.16.3]
+#   config file = None
+#   configured module search path = ['/root/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
+#   ansible python module location = /usr/lib/python3/dist-packages/ansible
+#   ansible collection location = /root/.ansible/collections:/usr/share/ansible/collections
+#   executable location = /usr/bin/ansible
+#   python version = 3.12.3 (main, Jan 17 2025, 18:03:48) [GCC 13.3.0] (/usr/bin/python3)
+#   jinja version = 3.1.2
+#   libyaml = True
+
+$ # The playbook and the rest of the commands are coming soon..
+```
 
 ## Proxmox technologies
 

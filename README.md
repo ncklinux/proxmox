@@ -368,6 +368,15 @@ $ ssh-keygen -t ed25519 -C "test@ansible.local" -f ~/.ssh/proxmox_id_ed25519
 # |=*o+...o.E       |
 # +----[SHA256]-----+
 
+$ ping -c2 192.168.56.6
+# PING 192.168.56.6 (192.168.56.6) 56(84) bytes of data.
+# 64 bytes from 192.168.56.6: icmp_seq=1 ttl=64 time=0.675 ms
+# 64 bytes from 192.168.56.6: icmp_seq=2 ttl=64 time=0.544 ms
+#
+# --- 192.168.56.6 ping statistics ---
+# 2 packets transmitted, 2 received, 0% packet loss, time 1004ms
+# rtt min/avg/max/mdev = 0.544/0.609/0.675/0.065 ms
+
 $ ssh-copy-id -i ~/.ssh/proxmox_id_ed25519.pub test@192.168.56.6
 # /usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/root/.ssh/proxmox_id_ed25519.pub"
 # /usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed

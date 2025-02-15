@@ -317,7 +317,7 @@ This playbook automates the deployment of Proxmox on a Debian 12, simplifying th
 
 ```bash
 # Install Ansible, Ansible Lint, and Pip
-$ sudo apt install -y ansible ansible-lint python3-pip
+$ sudo apt install -y ansible ansible-lint python3-pip git
 $ python3 -V && pip3 -V && ansible --version
 # Python 3.12.3
 # pip 24.0 from /usr/lib/python3/dist-packages/pip (python 3.12)
@@ -331,6 +331,68 @@ $ python3 -V && pip3 -V && ansible --version
 #   jinja version = 3.1.2
 #   libyaml = True
 
+# Ubuntu 24.04.2 LTS does not include the /etc/ansible directory and associated configuration files by default
+$ mkdir -pv /etc/ansible && cd /etc/ansible && ansible-config init --disabled > ansible.cfg
+# mkdir: created directory '/etc/ansible'
+# root@ansible:/etc/ansible# ls -la
+# total 48
+# drwxr-xr-x   2 root root  4096 Feb 15 15:32 .
+# drwxr-xr-x 111 root root  4096 Feb 15 15:32 ..
+# -rw-r--r--   1 root root 40173 Feb 15 15:32 ansible.cf
+```
+
+The `ansible.cfg` file is a configuration file that defines settings and parameters influencing how Ansible operates. It contains default settings, privilege escalation settings, and SSH connection settings, serving actually as a centralized point to customize Ansible's behavior. For the structure, I always follow the best official practices when writing playbooks, as outlined in the [documentation](https://docs.ansible.com/ansible/2.8/user_guide/playbooks_best_practices.html).
+
+```bash
+$ cd /etc/ansible
+$ git clone https://github.com/ncklinux/proxmox.git
+$ cd /etc/ansible/proxmox/ansible
+$ ssh-keygen -t ed25519 -C "test@ansible.local" -f ~/.ssh/proxmox_id_ed25519
+# Generating public/private ed25519 key pair.
+# Enter passphrase (empty for no passphrase):
+# Enter same passphrase again:
+# Your identification has been saved in /root/.ssh/proxmox_id_ed25519
+# Your public key has been saved in /root/.ssh/proxmox_id_ed25519.pub
+# The key fingerprint is:
+# SHA256:EpcbJHAwUxAaG/STDruOx692Rcj+hgyunGiVxe4fJv8 test@ansible.local
+# The key's randomart image is:
+# +--[ED25519 256]--+
+# | .+ B*+ .        |
+# |   * = o .       |
+# |  +.=.. +        |
+# |   +o+.o o       |
+# |  ..=.. S        |
+# |  .+....         |
+# | ooo.= o         |
+# |o+* +.* .        |
+# |=*o+...o.E       |
+# +----[SHA256]-----+
+
+$ ssh-copy-id -i ~/.ssh/proxmox_id_ed25519.pub test@192.168.56.6
+# /usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/root/.ssh/proxmox_id_ed25519.pub"
+# /usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+# /usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+# test@192.168.56.6's password:
+#
+# Number of key(s) added: 1
+#
+# Now try logging into the machine, with:   "ssh 'test@192.168.56.6'"
+# and check to make sure that only the key(s) you wanted were added.
+
+# Crucial first step, use this Ansible command to check connectivity to the servers defined in your inventory file
+$ ansible all -m ping -i /etc/ansible/proxmox/ansible/inventory.yaml
+# target_vm | SUCCESS => {
+#     "ansible_facts": {
+#         "discovered_interpreter_python": "/usr/bin/python3"
+#     },
+#     "changed": false,
+#     "ping": "pong"
+# }
+```
+
+To begin the deployment, we'll use CLI, if you prefer a more visual approach, we can leverage Ansible Automation Platform's web interface, [AWX](https://github.com/ansible/awx. Built on top of Ansible, AWX offers a user-friendly web-based interface, REST API, and task engine, making it a great alternative to executing commands than manually from the command line.
+
+```bash
 $ # The playbook and the rest of the commands are coming soon..
 ```
 

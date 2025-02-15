@@ -390,7 +390,7 @@ $ ansible all -m ping -i /etc/ansible/proxmox/ansible/inventory.yaml
 # }
 ```
 
-To begin the deployment, we'll use CLI, if you prefer a more visual approach, we can leverage Ansible Automation Platform's web interface, [AWX](https://github.com/ansible/awx. Built on top of Ansible, AWX offers a user-friendly web-based interface, REST API, and task engine, making it a great alternative to executing commands than manually from the command line.
+To begin the deployment, we'll use CLI, if you prefer a more visual approach, we can leverage Ansible Automation Platform's web interface, [AWX](https://github.com/ansible/awx). Built on top of Ansible, AWX offers a user-friendly web-based interface, REST API, and task engine, making it a great alternative to executing commands than manually from the command line.
 
 ```bash
 $ # The playbook and the rest of the commands are coming soon..

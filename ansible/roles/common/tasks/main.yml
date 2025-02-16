@@ -1,0 +1,90 @@
+---
+- name: Ensure {{ ansible_user }} has sudo access
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    line: "{{ ansible_user }} ALL=(ALL:ALL) ALL"
+    state: present
+    mode: "0440" # Set appropriate permissions for security
+    insertafter: "# User privilege specification" # Insert after this line
+    validate: "/usr/sbin/visudo -cf %s" # Validate the sudoers file after modification
+    regexp: "^{{ ansible_user }}\\s+ALL=\\(ALL:ALL\\)\\s+ALL$" # Regex to match existing line
+
+- name: System updates (apt update && apt upgrade)
+  ansible.builtin.apt:
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 86400
+
+- name: Install necessary packages
+  ansible.builtin.apt:
+    pkg:
+      - vim
+      - sudo
+      - curl
+      - ifupdown2
+      - software-properties-common
+      - apt-transport-https
+      - ca-certificates
+      - gnupg2
+    state: present
+
+- name: Deploy configuration from templates
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "0644"
+  loop:
+    - { src: "vimrc.j2", dest: "/root/.vimrc", owner: "root", group: "root" }
+    - {
+        src: "vimrc.j2",
+        dest: "/home/{{ ansible_user }}/.vimrc",
+        owner: "{{ ansible_user }}",
+        group: "{{ ansible_user }}",
+      }
+    - { src: "hosts.j2", dest: "/etc/hosts", owner: "root", group: "root" }
+
+- name: Set the system hostname
+  ansible.builtin.hostname:
+    name: proxmox.local
+
+- name: Comment out existing enp0s3 configuration if it exists
+  ansible.builtin.lineinfile:
+    path: /etc/network/interfaces
+    regexp: "^iface enp0s3 inet6 auto"
+    line: "# iface enp0s3 inet6 auto" # comment out the line
+    state: present
+
+- name: Get all non-loopback IP addresses
+  debug:
+    msg: "{{ ansible_all_ipv4_addresses + ansible_all_ipv6_addresses }}"
+
+- name: Run hostname --ip-address
+  command: hostname --ip-address
+  register: ip_address_output
+
+- name: Ensure that at least one non-loopback IP address is returned
+  debug:
+    var: ip_address_output.stdout
+
+- name: Ensure static IPv4 configuration exists
+  ansible.builtin.blockinfile:
+    path: /etc/network/interfaces
+    marker: "# {mark} ANSIBLE MANAGED BLOCK enp0s8"
+    block: |
+      auto enp0s8
+      iface enp0s8 inet static
+          address 192.168.56.6
+          netmask 255.255.255.0
+  notify: Reload network configuration
+
+- name: Ensure static IPv6 configuration exists
+  ansible.builtin.blockinfile:
+    path: /etc/network/interfaces
+    marker: "# {mark} ANSIBLE MANAGED BLOCK enp0s8"
+    block: |
+      iface enp0s8 inet6 static
+          address fd00::6/64
+          gateway fd00::1
+  notify: Reload network configuration

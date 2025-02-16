@@ -1,0 +1,117 @@
+---
+- name: Remove conflicting Proxmox Enterprise repository file (if it exists)
+  file:
+    path: /etc/apt/sources.list.d/pve-enterprise.list
+    state: absent
+
+- name: Remove potentially conflicting Proxmox repository file (alternative name)
+  file:
+    path: /etc/apt/sources.list.d/pve-install-repo.list
+    state: absent
+
+- name: Add Proxmox VE repository
+  copy:
+    dest: /etc/apt/sources.list.d/pve-install-repo.list
+    content: |
+      deb [arch=amd64] http://download.proxmox.com/debian/pve bookworm pve-no-subscription
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Download Proxmox release key
+  get_url:
+    url: https://enterprise.proxmox.com/debian/proxmox-release-bookworm.gpg
+    dest: /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Verify Proxmox release key SHA512 checksum
+  command: sha512sum /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg
+  register: sha512sum_result
+  changed_when: false
+  failed_when: sha512sum_result.rc != 0 or sha512sum_result.stdout != "7da6fe34168adc6e479327ba517796d4702fa2f8b4f0a9833f5ea6e6b48f6507a6da403a274fe201595edc86a84463d50383d07f64bdde2e3658108db7d6dc87  /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg"
+
+- name: Update APT package cache and upgrade packages
+  apt:
+    update_cache: yes
+    upgrade: full
+  register: apt_update_result
+  retries: 3
+  delay: 10
+  until: apt_update_result is success
+
+- name: Install Proxmox VE kernel
+  apt:
+    name: proxmox-default-kernel
+    state: present
+  register: kernel_install_result
+  retries: 3
+  delay: 10
+  until: kernel_install_result is success
+
+- name: Reboot the server
+  reboot:
+    msg: "Rebooting the server after kernel installation"
+    connect_timeout: 5
+    reboot_timeout: 300
+    pre_reboot_delay: 10
+  register: reboot_result
+
+- name: Install Proxmox VE, Postfix, Open-iSCSI, and Chrony
+  apt:
+    name:
+      - proxmox-ve
+      - postfix
+      - open-iscsi
+      - chrony
+    state: present
+    default_release: "{{ ansible_distribution_release }}"
+    force_apt_get: yes
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  register: proxmox_install_result
+  retries: 3
+  delay: 10
+  until: proxmox_install_result is success
+
+- name: Check for Proxmox port
+  shell: ss -tunelp | grep 8006
+  register: proxmox_port_result
+  changed_when: false
+  ignore_errors: yes
+
+- name: Remove Debian kernel and update GRUB
+  apt:
+    name:
+      - linux-image-amd64
+      - "linux-image-6.1*"
+    state: absent
+  register: kernel_remove_result
+  retries: 3
+  delay: 10
+  until: kernel_remove_result is success
+
+- name: Update GRUB configuration
+  command: update-grub
+  register: grub_update_result
+  retries: 3
+  delay: 10
+  until: grub_update_result is success
+
+- name: Uninstall os-prober
+  apt:
+    name: os-prober
+    state: absent
+  register: os_prober_remove_result
+  retries: 3
+  delay: 10
+  until: os_prober_remove_result is success
+
+- name: Reboot after os-prober removal
+  reboot:
+    msg: "Rebooting after os-prober removal"
+    connect_timeout: 5
+    reboot_timeout: 300
+    pre_reboot_delay: 10
+  register: final_reboot_result

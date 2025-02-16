@@ -1,0 +1,8 @@
+---
+- name: Run all roles
+  hosts: all
+  become: yes
+  become_user: root
+  roles:
+    - common
+    - proxmox
